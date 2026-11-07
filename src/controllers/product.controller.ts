@@ -33,3 +33,35 @@ export function getProductById(req: Request, res: Response): void {
       res.status(500).json({ message: "Gagal mengambil data produk" });
     });
 }
+
+export function createProduct(req: Request, res: Response): void {
+  const { name, price } = req.body as { name?: unknown; price?: unknown };
+
+  if (
+    typeof name !== "string" ||
+    name.trim().length === 0 ||
+    typeof price !== "number" ||
+    !Number.isFinite(price) ||
+    price < 0
+  ) {
+    res.status(400).json({
+      message: "Nama produk dan harga valid wajib diisi"
+    });
+    return;
+  }
+
+  void prisma.product
+    .create({
+      data: {
+        name: name.trim(),
+        price: price
+      }
+    })
+    .then((product) => {
+      res.status(201).json(product);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).json({ message: "Gagal membuat produk baru" });
+    });
+}
