@@ -111,3 +111,31 @@ export function updateProduct(req: Request, res: Response): void {
       res.status(500).json({ message: "Gagal memperbarui produk" });
     });
 }
+
+export function deleteProduct(req: Request, res: Response): void {
+  const productId = Number(req.params.id);
+
+  void prisma.product
+    .findUnique({ where: { id: productId } })
+    .then((existing) => {
+      if (!existing) {
+        res.status(404).json({ message: "Produk tidak ditemukan" });
+        return;
+      }
+
+      return prisma.product.delete({
+        where: { id: productId }
+      });
+    })
+    .then((product) => {
+      if (!product) {
+        return;
+      }
+
+      res.status(200).json({ message: "Produk berhasil dihapus", data: product });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).json({ message: "Gagal menghapus produk" });
+    });
+}
